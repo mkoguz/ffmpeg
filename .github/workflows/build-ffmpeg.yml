@@ -19,12 +19,11 @@ jobs:
             yasm
             nasm
             mingw-w64-i686-toolchain
-            mingw-w64-i686-pkg-config
+            mingw-w64-i686-binutils
 
       - name: Clone FFmpeg (v6.1)
         shell: msys2 {0}
         run: |
-          # FFmpeg 5 isterseniz release/5.1 yapabilirsiniz
           git clone -b release/6.1 --depth 1 https://git.ffmpeg.org/ffmpeg.git src
 
       - name: Configure & Compile (x86 Shared)
@@ -35,12 +34,13 @@ jobs:
             --prefix=$PWD/dist \
             --arch=x86 \
             --target-os=mingw32 \
-            --cross-prefix=i686-w64-mingw32- \
             --enable-shared \
             --disable-static \
             --disable-programs \
             --disable-doc \
-            --extra-cflags="-O3"
+            --disable-pthreads \
+            --enable-w32threads \
+            --extra-ldflags="-Wl,--add-stdcall-alias"
           make -j$(nproc)
           make install
 
