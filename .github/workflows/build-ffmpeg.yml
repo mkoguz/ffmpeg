@@ -36,7 +36,6 @@ jobs:
             --target-os=mingw32 \
             --enable-shared \
             --disable-static \
-            --disable-programs \
             --disable-doc \
             --disable-pthreads \
             --enable-w32threads \
@@ -49,3 +48,4 @@ jobs:
         with:
           name: ffmpeg-6-win32-shared
           path: src/dist/bin/
+          
