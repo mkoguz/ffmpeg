@@ -1,0 +1,51 @@
+name: Build FFmpeg 6 32-bit Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Setup MSYS2 (MINGW32)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+          update: true
+          install: >-
+            git
+            make
+            diffutils
+            yasm
+            nasm
+            mingw-w64-i686-toolchain
+            mingw-w64-i686-pkg-config
+
+      - name: Clone FFmpeg (v6.1)
+        shell: msys2 {0}
+        run: |
+          # FFmpeg 5 isterseniz release/5.1 yapabilirsiniz
+          git clone -b release/6.1 --depth 1 https://git.ffmpeg.org/ffmpeg.git src
+
+      - name: Configure & Compile (x86 Shared)
+        shell: msys2 {0}
+        run: |
+          cd src
+          ./configure \
+            --prefix=$PWD/dist \
+            --arch=x86 \
+            --target-os=mingw32 \
+            --cross-prefix=i686-w64-mingw32- \
+            --enable-shared \
+            --disable-static \
+            --disable-programs \
+            --disable-doc \
+            --extra-cflags="-O3"
+          make -j$(nproc)
+          make install
+
+      - name: Upload 32-bit Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-6-win32-shared
+          path: src/dist/bin/
